@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Cloud To-Do List Web App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+          --primary: #324e66;
+          --secondary: #86a8e7;
+          --accent: #f7cacd;
+          --cardbg: white;
+          --taskbg: #e3f6fc;
+          --bodygrad: linear-gradient(120deg, #FFDEE9 0%, #B5FFFC 100%);
+          --lavender: #a78bfa;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+            background: var(--bodygrad);
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.5s ease, background-image 0.5s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: -50vw;
+            width: 200vw;
+            height: 100vh;
+            background: radial-gradient(circle at 20% 20%, #FFC0CB66 20%, transparent 80%),
+                        radial-gradient(circle at 80% 50%, #87CEFA66 20%, transparent 80%),
+                        radial-gradient(circle at 50% 80%, #BAE1FF66 15%, transparent 85%);
+            animation: bubbleMove 60s linear infinite;
+            z-index: -1;
+        }
+        @keyframes bubbleMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(70vw); }
+        }
+        .main-title {
+            text-align: center;
+            font-size: 2.7rem;
+            font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+            color: var(--lavender);
+            font-weight: 800;
+            margin: 32px 0 10px 0;
+            letter-spacing: 0.03em;
+            text-shadow: 1px 1px 16px #efd8fa77, 0 2px 7px #fff;
+        }
+        .side-pens-img {
+            position: absolute;
+            left: 0;
+            top: 35%;
+            transform: translateY(-50%);
+            width: 260px;
+            z-index: 2;
+            border-radius: 30px;
+            box-shadow: 0 18px 44px #667abb38, 0 4px 44px #9996;
+            object-fit: contain;
+        }
+        .side-alarms-img {
+            position: absolute;
+            left: 0;
+            top: 65%;
+            transform: translateY(-50%);
+            width: 260px;
+            z-index: 2;
+            border-radius: 30px;
+            box-shadow: 0 15px 38px #c1676783;
+            object-fit: contain;
+        }
+        .side-tick-img {
+            position: absolute;
+            right: 0;
+            top: 35%;
+            transform: translateY(-50%);
+            width: 260px;
+            z-index: 2;
+            border-radius: 30px;
+            box-shadow: 0 18px 44px #509f4888, 0 4px 44px #9996;
+            object-fit: contain;
+        }
+        .side-max-img {
+            position: absolute;
+            right: 0;
+            top: 65%;
+            transform: translateY(-50%);
+            width: 260px;
+            z-index: 2;
+            border-radius: 30px;
+            box-shadow: 0 15px 38px #9f6ac983;
+            object-fit: contain;
+        }
+        @media (max-width: 900px) {
+           .side-pens-img, .side-tick-img, .side-alarms-img, .side-max-img { display: none; }
+        }
+        body.dark {
+            --primary: #f7cacd;
+            --secondary: #434C5E;
+            --accent: #324e66;
+            --cardbg: #2e3440;
+            --taskbg: #434C5E;
+            --bodygrad: linear-gradient(120deg, #485563 0%, #29323c 100%);
+            background: var(--bodygrad);
+            color: #F5F5F5;
+        }
+        .hero {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, var(--accent) 50%, var(--bodygrad) 100%);
+            border-bottom: 8px solid var(--secondary);
+        }
+        .hero img {
+            height: 90px;
+            border-radius: 50px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            margin: 24px;
+        }
+        .hero-title {
+            font-size: 2em;
+            color: var(--primary);
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+            font-weight: 800;
+            margin: 0;
+        }
+        .rotating-quote {
+            color: #fff;
+            font-size: 1.17rem;
+            font-weight: 800;
+            font-style: italic;
+            text-shadow: 0 1px 8px #467FD958, 0 0 56px #2224;
+            letter-spacing: 0.02em;
+            margin: 6px 0 0 0;
+            min-height: 1.7em;
+            text-align: left;
+        }
+        .profile {
+            display: flex; align-items: center; gap:12px;
+        }
+        .profile img {
+            width: 38px; height:38px; border-radius:50%; border:2px solid var(--secondary);
+        }
+        .container {
+            background: var(--cardbg);
+            box-shadow: 0 12px 48px rgba(134,168,231,0.25);
+            border-radius: 28px;
+            max-width: 520px;
+            margin: 30px auto 0 auto;
+            padding: 48px 40px 36px 40px;
+            position: relative;
+            z-index: 10;
+            transition: box-shadow 0.3s ease;
+        }
+        .container:hover {
+            box-shadow: 0 20px 80px rgba(134,168,231,0.40);
+        }
+        .container-title {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: var(--secondary);
+            border-bottom: 3px solid var(--lavender);
+            padding-bottom: 8px;
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            letter-spacing: 0.03em;
+        }
+        .theme-switch {
+            float: right;
+            margin-top: -4px;
+            cursor:pointer;
+            font-size:1.1em;
+            color: var(--primary);
+        }
+        .input-row {
+            display: flex;
+            margin-bottom: 18px;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .input-row img {
+            width: 116px;
+            border-radius: 18px;
+            margin-right: 20px;
+            margin-left: 7px;
+            box-shadow: 0 10px 30px #c7cefd70;
+            transition: width .3s ease, box-shadow .3s ease;
+        }
+        #taskInput {
+            flex: 2;
+            font-size: 1.05em;
+            padding: 9px 14px;
+            border: 3px solid var(--secondary);
+            border-radius: 10px;
+            background: var(--cardbg);
+            color: var(--primary);
+        }
+        #charCounter {
+            font-size: 0.85em;
+            color: var(--secondary);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        #charCounter.warning {
+            color: #ff9800;
+        }
+        #charCounter.error {
+            color: #f44336;
+            font-weight: 600;
+        }
+        button {
+            font-weight: 600;
+            font-size: 1em;
+            padding: 11px 22px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(120deg, var(--secondary) 0%, #91eac4 100%);
+            color: var(--primary);
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+            box-shadow: 0 3px 14px rgba(134,168,231,0.15);
+        }
+        button:hover {
+            background: linear-gradient(120deg, #91eac4 0%, var(--secondary) 100%);
+            box-shadow: 0 5px 20px rgba(134,168,231,0.25);
+            color: #222;
+        }
+        #taskList {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            min-height: 48px;
+        }
+        #taskList li {
+            background: var(--taskbg);
+            border-radius: 10px;
+            margin: 10px 0;
+            padding: 10px 20px;
+            color: var(--primary);
+            font-size: 1.08em;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 3px 14px rgba(134,168,231,0.1);
+            gap: 12px;
+            position: relative;
+            transition: background 0.25s ease;
+        }
+        #taskList li.done {
+            background: #b5ffc3; color: #485563; text-decoration: line-through; opacity: 0.75;
+        }
+        #taskList li i.delete {
+            color: #f68084;
+            font-size: 1.3em;
+            margin-left: auto;
+            cursor: pointer;
+            margin-right: 14px;
+            transition: color 0.3s;
+        }
+        #taskList li i.delete:hover {
+            color: #e00000;
+        }
+        #taskList li .help {
+            display: none;
+        }
+        #taskList li .task-checkbox {
+            margin-right: 14px;
+            accent-color: var(--secondary);
+            cursor: pointer;
+        }
+        .alert {
+            opacity: 0;
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+            border-radius: 12px;
+            padding: 14px 24px;
+            margin: 12px 0 18px 0;
+            box-shadow: 0 2px 12px #cbccef88;
+            text-align: center;
+            letter-spacing: 1px;
+            font-size: 1.12em;
+            transition: all 0.5s ease;
+        }
+        .alert.show {
+            opacity: 1;
+        }
+        .footer {
+            text-align: center;
+            color: #333;
+            font-size: 0.95em;
+            margin-top: 26px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .footer-icons {
+            display: flex;
+            gap: 20px;
+        }
+        .footer-icons a {
+            font-size: 1.5em;
+        }
+        #colorPickerContainer {
+            margin-top: 18px;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #backgroundColorLabel {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        #colorPicker {
+            height: 34px;
+            width: 68px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        #toggleGradientBtn {
+            padding: 8px 18px;
+            background: var(--secondary);
+            border-radius: 10px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgb(124 169 242 / 0.5);
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        #toggleGradientBtn:hover {
+            background: #91eac4;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-title">Task Planner</div>
+    <img src="pens.png" alt="Pens Decor" class="side-pens-img" />
+    <img src="alarms.png" alt="Alarms Decor" class="side-alarms-img" />
+    <img src="tick.png" alt="Tick Decor" class="side-tick-img" />
+    <img src="max.png" alt="Max Decor" class="side-max-img" />
+    <div class="hero">
+        <img src="https://images.unsplash.com/photo-1465101162946-4377e57745c3?auto=format&fit=facearea&w=160&q=80" alt="Cloud Hero" />
+        <div>
+            <div class="hero-title">Cloud To-Do List App</div>
+            <div class="rotating-quote" id="rotatingQuote"></div>
+            <div style="color: var(--secondary); font-size: 1em; margin-top: 7px">
+                Organize tasks securely, powered by Firebase.
+            </div>
+            <div class="profile" style="margin-top: 6px">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User Avatar" />
+                <b>Shreya Sankaran</b>&nbsp;&middot;&nbsp;Student
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="container-title">Plan It Like A Pro</div>
+        <span class="theme-switch" id="themeSwitch" title="Switch Theme"><i class="fa-solid fa-circle-half-stroke"></i></span>
+        <div class="alert" id="alert"> </div>
+        <div class="input-row">
+            <img src="todo.png" alt="Todo" />
+            <input type="text" id="taskInput" placeholder="Add a new task..." maxlength="500" />
+            <button id="addTaskBtn">Add Task</button>
+            <button id="clearTasksBtn">Clear All</button>
+        </div>
+        <div id="charCounter" style="color: var(--secondary); font-size: 0.85em; margin-top: -10px; margin-bottom: 10px; font-weight: 500;">0 / 500 characters</div>
+        <div>
+            <span id="taskCount" style="color: var(--secondary); font-weight: 600"></span>
+        </div>
+        <ul id="taskList"></ul>
+        <div id="colorPickerContainer">
+            <label id="backgroundColorLabel" for="colorPicker">Change Background Color:</label>
+            <input type="color" id="colorPicker" value="#B5FFFC" />
+            <button id="toggleGradientBtn">Toggle Gradient</button>
+        </div>
+        <div class="tip-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>
+                <b>Tips:</b> Click check to mark tasks done,
+                <i class="fa-solid fa-trash"></i> to delete just one, and
+                <b>"Clear All"</b> for starting fresh.
+            </span>
+        </div>
+        <div class="footer">
+            <div class="footer-icons">
+                <a href="https://firebase.google.com/products/firestore" target="_blank"><i class="fa-brands fa-google"></i></a>
+                <a href="https://firebase.google.com/" target="_blank"><i class="fa-solid fa-cloud"></i></a>
+                <a href="mailto:shreya@email.com"><i class="fa-solid fa-envelope"></i></a>
+            </div>
+            <div>
+                Project by Shreya Sankaran &nbsp;&middot;&nbsp; <a href="mailto:shreya@email.com">Contact</a>
+                &nbsp;&middot;&nbsp; Semester Demo
+            </div>
+            <div style="font-size: 0.8rem; color: var(--secondary)">
+                Toggle theme and background for fun!
+            </div>
+        </div>
+    </div>
+    <script src="bundle.js"></script>
+    <script>
+        const quotes = [
+            "You don't need to see the whole staircase, just take the first step.",
+            "Every great accomplishment begins with a single task.",
+            "Focus on progress, not perfection.",
+            "Make each day your masterpiece.",
+            "Tick off goals, not excuses!"
+        ];
+        let quoteIdx = 0;
+        const quoteContainer = document.getElementById('rotatingQuote');
+        function showQuote() {
+            quoteContainer.textContent = quotes[quoteIdx];
+            quoteIdx = (quoteIdx + 1) % quotes.length;
+        }
+        showQuote();
+        setInterval(showQuote, 4500);
+
+        // Character counter functionality
+        const taskInput = document.getElementById('taskInput');
+        const charCounter = document.getElementById('charCounter');
+        
+        taskInput.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            charCounter.textContent = currentLength + ' / 500 characters';
+            
+            // Change color based on length
+            if (currentLength > 450) {
+                charCounter.classList.add('error');
+                charCounter.classList.remove('warning');
+            } else if (currentLength > 400) {
+                charCounter.classList.add('warning');
+                charCounter.classList.remove('error');
+            } else {
+                charCounter.classList.remove('warning', 'error');
+            }
+        });
+
+        // Color/theme logic as before
+        const colorPicker = document.getElementById("colorPicker");
+        const toggleGradientBtn = document.getElementById("toggleGradientBtn");
+        const body = document.body;
+
+        let isGradientOn = true;
+
+        colorPicker.addEventListener("input", (e) => {
+            if (!isGradientOn) {
+                body.style.background = e.target.value;
+            }
+        });
+
+        toggleGradientBtn.addEventListener("click", () => {
+            isGradientOn = !isGradientOn;
+            if (isGradientOn) {
+                body.style.background = getComputedStyle(body).getPropertyValue(
+                    "--bodygrad"
+                );
+                toggleGradientBtn.textContent = "Toggle Gradient";
+            } else {
+                const color = colorPicker.value;
+                body.style.background = color;
+                toggleGradientBtn.textContent = "Enable Gradient";
+            }
+        });
+
+        document.getElementById("themeSwitch").onclick = () => {
+            document.body.classList.toggle("dark");
+        };
+    </script>
+</body>
+</html>
